@@ -21,7 +21,24 @@ headers = {
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    running = False
+    task = ""
+    start_time = ""
+
+    if os.path.exists("state.json"):
+        with open("state.json") as f:
+            data = json.load(f)
+            running = True
+            task = data["task"]
+            start_time = data["start_time"]
+
+    return render_template(
+        "index.html",
+        running=running,
+        task=task,
+        start_time=start_time,
+        message=""
+    )
 
 @app.route("/start", methods=["POST"])
 def start():
@@ -30,6 +47,8 @@ def start():
         return "すでにタイマー動作中です（STOPしてから再開してください）"
 
     task = request.form.get("task")
+
+    start_time = datetime.now(JST).isoformat()
 
     if not task:
         return "タスク名が空です"
@@ -55,7 +74,11 @@ def start():
     page_id = res.json()["id"]
 
     with open("state.json", "w") as f:
-        json.dump({"page_id": page_id}, f)
+        json.dump({
+            "page_id": page_id,
+            "task": task,
+            "start_time": start_time
+        }, f)
 
     return redirect("/")
 
