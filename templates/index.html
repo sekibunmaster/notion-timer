@@ -1,14 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Notion Timer</title>
 </head>
 <body>
 
 <h2>Notion Timer</h2>
 
+<!-- メッセージ表示 -->
 <p style="color:red;">{{ message }}</p>
 
+<!-- 現在の状態表示 -->
+{% if running %}
+    <p>現在のタスク: {{ task }}</p>
+    <p id="timer"></p>
+{% endif %}
+
+<!-- STARTボタン -->
 <form action="/start" method="post">
     <input type="text" name="task" placeholder="タスク名" required>
     <button type="submit">START</button>
@@ -16,9 +25,33 @@
 
 <br>
 
+<!-- STOPボタン -->
 <form action="/stop" method="post">
     <button type="submit">STOP</button>
 </form>
+
+<!-- タイマー用スクリプト -->
+<script>
+let startTime = "{{ start_time }}";
+
+if (startTime) {
+    function updateTimer() {
+        let start = new Date(startTime);
+        let now = new Date();
+        let diff = Math.floor((now - start) / 1000);
+
+        let h = Math.floor(diff / 3600);
+        let m = Math.floor((diff % 3600) / 60);
+        let s = diff % 60;
+
+        document.getElementById("timer").innerText =
+            `経過時間: ${h}時間 ${m}分 ${s}秒`;
+    }
+
+    updateTimer(); // 初回表示
+    setInterval(updateTimer, 1000);
+}
+</script>
 
 </body>
 </html>
